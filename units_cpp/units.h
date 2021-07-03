@@ -36,5 +36,9 @@ extern "C"
    void Vec3_GetVec3(Vec3* self, int* aX, int* aY, int* aZ);
    void Vec3_SetVec3(Vec3* self, int aX, int aY, int aZ);
    void Vec3_Print(Vec3* self);
+
+   // static methods
+   int Units_Sum(X* aX, Y* aY, Z* aZ);
+   void Units_Zero_Y(Y* aY);
 }
 #endif // UNITS_H

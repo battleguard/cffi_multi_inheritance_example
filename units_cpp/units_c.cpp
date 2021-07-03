@@ -41,3 +41,13 @@ void Vec3_SetVec3(Vec3* self, int aX, int aY, int aZ)
    self->mY = aY;
    self->mZ = aZ;
 }
+
+int Units_Sum(X* aX, Y* aY, Z* aZ)
+{
+   return Sum(*aX, *aY, *aZ);
+}
+
+void Units_Zero_Y(Y* aValue)
+{
+   return Zero_Y(*aValue);
+}

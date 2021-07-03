@@ -7,21 +7,21 @@ struct X
 {
    virtual ~X() = default;
    int mX{0};
-   virtual void Print() { std::cout << "X::mX=" << mX << "\n"; }
+   virtual void Print() { std::cout << "X::mX=" << mX << std::endl; }
 };
 
 struct Y
 {
    virtual ~Y() = default;
    int mY{ 0 };
-   virtual void Print() { std::cout << "Y::mY=" << mY << "\n"; }
+   virtual void Print() { std::cout << "Y::mY=" << mY << std::endl; }
 };
 
 struct Z
 {
    virtual ~Z() = default;
    int mZ{ 0 };
-   virtual void Print() { std::cout << "Y::mZ=" << mZ << "\n"; }
+   virtual void Print() { std::cout << "Y::mZ=" << mZ << std::endl; }
 };
 
 struct Vec3 :  X, Y, Z
@@ -37,9 +37,21 @@ struct Vec3 :  X, Y, Z
 
    void Print() override
    {
-      std::cout << "Vec3::mX=" << mX << " mY=" << mY << " mZ=" << mZ << "\n";
+      std::cout << "Vec3::mX=" << mX << " mY=" << mY << " mZ=" << mZ << std::endl;
    }
 };
+
+// testing static functions and passing in base classes
+inline int Sum(const X& aX, const Y& aY, const Z& aZ)
+{
+   return aX.mX + aY.mY + aZ.mZ;
+}
+
+inline void Zero_Y(Y& aValue)
+{
+   aValue.mY = 0;
+}
+
 
 // struct Vec4 : Vec3
 // {
