@@ -1,5 +1,6 @@
-from typing import Optional, Type, Any, Dict, Tuple
-
+from __future__ import annotations
+from typing import Optional, Type, Any, Dict, Tuple, Union, List, Callable
+import pathlib
 import cffi
 from cffi import FFI
 
@@ -11,15 +12,17 @@ class UtilFFI:
     def __init__(self) -> None:
         if UtilFFI.LIB:
             return
+        install_path = pathlib.Path("../build/wsf_install")
+        units_include_path = install_path.joinpath("include/units/units.h").absolute()
+        lib_path = install_path.joinpath("bin/units.dll").absolute()
         UtilFFI.FFI = cffi.FFI()
-        with open('units.h', 'r') as file:
-            headers = file.read()
-            # headers = headers.replace("Y*", "void*")
-            # headers = headers.replace("X*", "void*")
-            # headers = headers.replace("Z*", "void*")
-            # headers = headers.replace("Vec3*", "void*")
-        UtilFFI.FFI.cdef(headers)
-        UtilFFI.LIB = UtilFFI.FFI.dlopen('units.dll')
+        header_str = ""
+        with open(units_include_path, 'r') as file:
+            for line in file.readlines():
+                if line.startswith("   "):
+                    header_str += line
+        UtilFFI.FFI.cdef(header_str)
+        UtilFFI.LIB = UtilFFI.FFI.dlopen(str(lib_path))
 
     @staticmethod
     def init_ptr(function, ptr):
@@ -28,7 +31,17 @@ class UtilFFI:
         return False, ptr
 
 
-class X(UtilFFI):
+# class WrapperBase(UtilFFI):
+#     __create_func: Optional[Callable]
+#     __delete_func: Optional[Callable]
+#
+#     def __init__(self, c_create: Callable, c_delete: Callable) -> None:
+#         __create_func = c_create
+#         __delete_func = c_delete
+#         UtilFFI.__init__(self)
+
+
+class X(WrapperBase):
     def __init__(self, ptr=None) -> None:
         UtilFFI.__init__(self)
         self.__originator, self.__ptr = UtilFFI.init_ptr(UtilFFI.LIB.X_Create, ptr)
@@ -39,10 +52,10 @@ class X(UtilFFI):
         self.__ptr = None
         self.__originator = False
 
-    def is_x_originator(self):
+    def is_originator(self):
         return self.__originator
 
-    def get_x_cptr(self):
+    def get_c_pointer(self, class_type: Type[X]):
         return self.__ptr
 
     def get_x(self) -> int:
@@ -66,10 +79,10 @@ class Y(UtilFFI):
         self.__ptr = None
         self.__originator = False
 
-    def is_y_originator(self):
+    def is_originator(self):
         return self.__originator
 
-    def get_y_cptr(self):
+    def get_c_pointer(self, class_type: Type[Y]):
         return self.__ptr
 
     def get_y(self) -> int:
@@ -93,10 +106,10 @@ class Z(UtilFFI):
         self.__ptr = None
         self.__originator = False
 
-    def is_z_originator(self):
+    def is_originator(self):
         return self.__originator
 
-    def get_z_cptr(self):
+    def get_c_pointer(self, class_type: Type[Z]):
         return self.__ptr
 
     def get_z(self) -> int:
@@ -110,6 +123,7 @@ class Z(UtilFFI):
 
 
 class Vec3(X, Y, Z):
+
     def __init__(self, ptr=None) -> None:
         UtilFFI.__init__(self)
         self.__originator, self.__ptr = UtilFFI.init_ptr(UtilFFI.LIB.Vec3_Create, ptr)
@@ -123,11 +137,13 @@ class Vec3(X, Y, Z):
         self.__ptr = None
         self.__originator = False
 
-    def is_vec3_originator(self):
+    def is_originator(self):
         return self.__originator
 
-    def get_vec3_cptr(self):
-        return self.__ptr
+    def get_c_pointer(self, class_type: Union[Type[Vec3], Vec3.__bases__]):
+        if not class_type or class_type == self.__class__:
+            return self.__ptr
+        return class_type.get_c_pointer(self, class_type)
 
     def get_vec3(self) -> Tuple[int, int, int]:
         buffer_array = UtilFFI.FFI.new("int[3]")
@@ -150,12 +166,11 @@ class GlobalMethods:
         print(x.__class__)
         print(y.__class__)
         print(z.__class__)
-        temp = UtilFFI.LIB.Units_Sum
-        return UtilFFI.LIB.Units_Sum(x.get_x_cptr(), y.get_y_cptr(), z.get_z_cptr())
+        return UtilFFI.LIB.Units_Sum(x.get_c_pointer(X), y.get_c_pointer(Y), z.get_c_pointer(Z))
 
     @staticmethod
     def zero_y(y: Y):
-        UtilFFI.LIB.Units_Zero_Y(y.get_y_cptr())
+        UtilFFI.LIB.Units_Zero_Y(y.get_c_pointer(Y))
 
 
 def test_y():
@@ -201,34 +216,16 @@ def test_vec3():
 
 
 if __name__ == '__main__':
-    # test_x()
-    # test_y()
-    # test_z()
+    temp: Vec3 = Vec3()
+    temp.set_vec3(10, 20, 30)
+    GlobalMethods.zero_y(temp)
+    print(temp.get_vec3())
+    print(temp.get_c_pointer(class_type=Vec3))
+    print(temp.get_c_pointer(class_type=X))
+    print(temp.get_c_pointer(class_type=Y))
+    print(temp.get_c_pointer(class_type=Z))
+    print(X().get_c_pointer(Vec3))
+    test_x()
+    test_y()
+    test_z()
     test_vec3()
-    # FFI: FFI = cffi.FFI()
-    # with open('units.h', 'r') as file:
-    #     headers = file.read()
-    #     headers = headers.replace("Y*", "void*")
-    #     headers = headers.replace("X*", "void*")
-    #     headers = headers.replace("Z*", "void*")
-    #     headers = headers.replace("Vec3*", "void*")
-    # FFI.cdef(headers)
-    # LIB = FFI.dlopen('units.dll')
-
-    # temp = LIB.X_Create()
-    # LIB.X_SetX(temp, int(10))
-    # print(LIB.X_GetX(temp))
-
-    # vec3 = LIB.Vec3_Create()
-    # LIB.Vec3_SetVec3(vec3,10,20,30)
-    # LIB.Vec3_Print(vec3)
-    # LIB.X_Print(LIB.Vec3_AsX(vec3))
-    # LIB.Y_Print(vec3)
-    # LIB.Z_Print(vec3)
-
-    # y_ptr = LIB.Vec3_AsY(vec3)
-    # z_ptr = LIB.Vec3_AsZ(vec3)
-    #
-    # print(LIB.X_GetX(vec3))
-    # print(LIB.Y_GetY(y_ptr))
-    # print(LIB.Z_GetZ(z_ptr))
