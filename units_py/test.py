@@ -36,20 +36,18 @@ class WrapperBase:
         else:
             self.ptr_dict[self.__class__] = ptr
         # create ptrs to base classes to handle multi inheritance
-        self.__add_base_class_ptrs(self.__class__)
+        for base_class in self.__class__.__bases__:
+            self.__add_base_class_ptrs(self.__class__, base_class)
 
-    def __add_base_class_ptrs(self, cur_class: type):
-        base_types = cur_class.__bases__
-        if base_types == (WrapperBase,):
-            if cur_class is self.__class__:
-                return
-            # example Vec3_AsX(Vec3* self)
-            cast_method_name = f"{self.__class__.__name__}_As{cur_class.__name__}"
-            cast_method = UtilFFI.LIB.__getattr__(cast_method_name)
-            self.ptr_dict[cur_class] = cast_method(self.get_c_pointer(self.__class__))
-        else:
-            for base_type in base_types:
-                self.__add_base_class_ptrs(base_type)
+    def __add_base_class_ptrs(self, cur_class: type, base_class: type):
+        if base_class == WrapperBase:
+            return
+        # example Vec3_AsX(Vec3* self)
+        cast_method_name = f"{cur_class.__name__}_As{base_class.__name__}"
+        cast_method = UtilFFI.LIB.__getattr__(cast_method_name)
+        self.ptr_dict[base_class] = cast_method(self.get_c_pointer(cur_class))
+        for base_type in base_class.__bases__:
+            self.__add_base_class_ptrs(base_class, base_type)
 
     def __del__(self):
         # only delete pointer if we created the pointer ourselves in the __init__ call
@@ -64,7 +62,7 @@ class WrapperBase:
 
 class X(WrapperBase):
     def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, UtilFFI.LIB.X_Create, UtilFFI.LIB.X_Destroy, ptr)
+        WrapperBase.__init__(self, UtilFFI.LIB.X_X, UtilFFI.LIB.X_Delete, ptr)
 
     def get_x(self) -> int:
         return UtilFFI.LIB.X_GetX(self.get_c_pointer(X))
@@ -78,13 +76,13 @@ class X(WrapperBase):
 
 class Y(WrapperBase):
     def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, UtilFFI.LIB.Y_Create, UtilFFI.LIB.Y_Destroy, ptr)
+        WrapperBase.__init__(self, UtilFFI.LIB.Y_Y, UtilFFI.LIB.Y_Delete, ptr)
 
     def get_y(self) -> int:
         return UtilFFI.LIB.Y_GetY(self.get_c_pointer(Y))
 
     def set_y(self, value: int):
-        return UtilFFI.LIB.Y_SetY(self.get_c_pointer(Y), value)
+        UtilFFI.LIB.Y_SetY(self.get_c_pointer(Y), value)
 
     def print(self):
         UtilFFI.LIB.Y_Print(self.get_c_pointer(Y))
@@ -92,13 +90,13 @@ class Y(WrapperBase):
 
 class Z(WrapperBase):
     def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, UtilFFI.LIB.Z_Create, UtilFFI.LIB.Z_Destroy, ptr)
+        WrapperBase.__init__(self, UtilFFI.LIB.Z_Z, UtilFFI.LIB.Z_Delete, ptr)
 
     def get_z(self) -> int:
         return UtilFFI.LIB.Z_GetZ(self.get_c_pointer(Z))
 
     def set_z(self, value: int):
-        return UtilFFI.LIB.Z_SetZ(self.get_c_pointer(Z), value)
+        UtilFFI.LIB.Z_SetZ(self.get_c_pointer(Z), value)
 
     def print(self):
         UtilFFI.LIB.Z_Print(self.get_c_pointer(Z))
@@ -107,7 +105,7 @@ class Z(WrapperBase):
 class Vec3(X, Y, Z):
 
     def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, UtilFFI.LIB.Vec3_Create, UtilFFI.LIB.Vec3_Destroy, ptr)
+        WrapperBase.__init__(self, UtilFFI.LIB.Vec3_Vec3, UtilFFI.LIB.Vec3_Delete, ptr)
 
     def get_vec3(self) -> Tuple[int, int, int]:
         buffer_array = UtilFFI.FFI.new("int[3]")
@@ -119,13 +117,16 @@ class Vec3(X, Y, Z):
     def set_vec3(self, x: int, y: int, z: int) -> None:
         UtilFFI.LIB.Vec3_SetVec3(self.get_c_pointer(Vec3), x, y, z)
 
-    def print(self):
-        UtilFFI.LIB.Vec3_Print(self.get_c_pointer(Vec3))
-
 
 class Vec4(Vec3):
     def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, UtilFFI.LIB.Vec3_Create, UtilFFI.LIB.Vec3_Destroy, ptr)
+        WrapperBase.__init__(self, UtilFFI.LIB.Vec4_Vec4, UtilFFI.LIB.Vec4_Delete, ptr)
+
+    def get_d(self) -> int:
+        return UtilFFI.LIB.Vec4_GetD(self.get_c_pointer(Vec4))
+
+    def set_d(self, value: int):
+        UtilFFI.LIB.Vec4_SetD(self.get_c_pointer(Vec4), value)
 
 
 class GlobalMethods:
@@ -184,6 +185,15 @@ def test_vec3():
     temp_vec3.print()
 
 
+def test_vec4():
+    temp_vec4 = Vec4()
+    temp_vec4.set_vec3(6, 7, 8)
+    temp_vec4.set_d(10)
+    print(f"Vec4.get_d() = {temp_vec4.get_d()}")
+    temp_vec4.print()
+    print(temp_vec4.ptr_dict)
+
+
 if __name__ == '__main__':
     UtilFFI()
     temp: Vec3 = Vec3()
@@ -199,3 +209,4 @@ if __name__ == '__main__':
     test_y()
     test_z()
     test_vec3()
+    test_vec4()

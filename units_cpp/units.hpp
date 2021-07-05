@@ -6,6 +6,8 @@
 struct X
 {
    virtual ~X() = default;
+   X() = default;
+   X(int aX) : mX(aX) {}
    int mX{0};
    virtual void Print() { std::cout << "X::mX=" << mX << std::endl; }
 };
@@ -13,6 +15,8 @@ struct X
 struct Y
 {
    virtual ~Y() = default;
+   Y() = default;
+   Y(int aY) : mY(aY) {}
    int mY{ 0 };
    virtual void Print() { std::cout << "Y::mY=" << mY << std::endl; }
 };
@@ -20,6 +24,8 @@ struct Y
 struct Z
 {
    virtual ~Z() = default;
+   Z() = default;
+   Z(int aZ) : mZ(aZ) {}
    int mZ{ 0 };
    virtual void Print() { std::cout << "Y::mZ=" << mZ << std::endl; }
 };
@@ -32,7 +38,6 @@ struct Vec3 :  X, Y, Z
       mY = aY;
       mZ = aZ;
    }
-
    Vec3() = default;
 
    void Print() override
@@ -53,19 +58,20 @@ inline void Zero_Y(Y& aValue)
 }
 
 
-// struct Vec4 : Vec3
-// {
-//    Vec4(int aX, int aY, int aZ, int aD)
-//       : Vec3(aX, aY, aZ), mD(aD) 
-//    {
-//       mZ = aZ;
-//    }
-//    int mD{ 0 };
-//    void Print() override
-//    {
-//       std::cout << "Vec4::mX=" << mX << " mY=" << mY << " mZ=" << mZ
-//                 << " mD=" << mD << "\n";
-//    }
-// };
+struct Vec4 : Vec3
+{
+   Vec4() = default;
+   Vec4(int aX, int aY, int aZ, int aD)
+      : Vec3(aX, aY, aZ), mD(aD) 
+   {
+      mZ = aZ;
+   }
+   int mD{ 0 };
+   void Print() override
+   {
+      std::cout << "Vec4::mX=" << mX << " mY=" << mY << " mZ=" << mZ
+                << " mD=" << mD << "\n";
+   }
+};
 
 #endif // UNITS_HPP
