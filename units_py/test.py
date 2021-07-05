@@ -24,139 +24,91 @@ class UtilFFI:
         UtilFFI.FFI.cdef(header_str)
         UtilFFI.LIB = UtilFFI.FFI.dlopen(str(lib_path))
 
-    @staticmethod
-    def init_ptr(function, ptr):
-        if ptr is None:
-            return True, function()
-        return False, ptr
 
+class WrapperBase:
+    def __init__(self, c_create: Callable, delete_func: Callable, ptr=None):
+        self.ptr_dict: Dict[Type, Any] = {}
+        self.__originator = ptr is None
+        if self.__originator:
+            # if we are originator create pointer and store delete function
+            self.ptr_dict[self.__class__] = c_create()
+            self.__delete_func: Callable = delete_func
+        else:
+            self.ptr_dict[self.__class__] = ptr
 
-# class WrapperBase(UtilFFI):
-#     __create_func: Optional[Callable]
-#     __delete_func: Optional[Callable]
-#
-#     def __init__(self, c_create: Callable, c_delete: Callable) -> None:
-#         __create_func = c_create
-#         __delete_func = c_delete
-#         UtilFFI.__init__(self)
+    def __del__(self):
+        # only delete pointer if we created the pointer ourselves in the __init__ call
+        if self.__originator:
+            self.__delete_func(self.ptr_dict[self.__class__])
+        self.ptr_dict.clear()
+        self.__originator = False
+
+    def get_c_pointer(self, class_type: Type):
+        return self.ptr_dict[class_type]
 
 
 class X(WrapperBase):
     def __init__(self, ptr=None) -> None:
-        UtilFFI.__init__(self)
-        self.__originator, self.__ptr = UtilFFI.init_ptr(UtilFFI.LIB.X_Create, ptr)
-
-    def __del__(self):
-        if self.__originator:
-            UtilFFI.LIB.X_Destroy(self.__ptr)
-        self.__ptr = None
-        self.__originator = False
-
-    def is_originator(self):
-        return self.__originator
-
-    def get_c_pointer(self, class_type: Type[X]):
-        return self.__ptr
+        WrapperBase.__init__(self, UtilFFI.LIB.X_Create, UtilFFI.LIB.X_Destroy, ptr)
 
     def get_x(self) -> int:
-        return UtilFFI.LIB.X_GetX(self.__ptr)
+        return UtilFFI.LIB.X_GetX(self.get_c_pointer(X))
 
     def set_x(self, value: int):
-        return UtilFFI.LIB.X_SetX(self.__ptr, value)
+        return UtilFFI.LIB.X_SetX(self.get_c_pointer(X), value)
 
     def print(self):
-        UtilFFI.LIB.X_Print(self.__ptr)
+        UtilFFI.LIB.X_Print(self.get_c_pointer(X))
 
 
-class Y(UtilFFI):
+class Y(WrapperBase):
     def __init__(self, ptr=None) -> None:
-        UtilFFI.__init__(self)
-        self.__originator, self.__ptr = UtilFFI.init_ptr(UtilFFI.LIB.Y_Create, ptr)
-
-    def __del__(self):
-        if self.__originator:
-            UtilFFI.LIB.Y_Destroy(self.__ptr)
-        self.__ptr = None
-        self.__originator = False
-
-    def is_originator(self):
-        return self.__originator
-
-    def get_c_pointer(self, class_type: Type[Y]):
-        return self.__ptr
+        WrapperBase.__init__(self, UtilFFI.LIB.Y_Create, UtilFFI.LIB.Y_Destroy, ptr)
 
     def get_y(self) -> int:
-        return UtilFFI.LIB.Y_GetY(self.__ptr)
+        return UtilFFI.LIB.Y_GetY(self.get_c_pointer(Y))
 
     def set_y(self, value: int):
-        return UtilFFI.LIB.Y_SetY(self.__ptr, value)
+        return UtilFFI.LIB.Y_SetY(self.get_c_pointer(Y), value)
 
     def print(self):
-        UtilFFI.LIB.Y_Print(self.__ptr)
+        UtilFFI.LIB.Y_Print(self.get_c_pointer(Y))
 
 
-class Z(UtilFFI):
+class Z(WrapperBase):
     def __init__(self, ptr=None) -> None:
-        UtilFFI.__init__(self)
-        self.__originator, self.__ptr = UtilFFI.init_ptr(UtilFFI.LIB.Z_Create, ptr)
-
-    def __del__(self):
-        if self.__originator:
-            UtilFFI.LIB.Z_Destroy(self.__ptr)
-        self.__ptr = None
-        self.__originator = False
-
-    def is_originator(self):
-        return self.__originator
-
-    def get_c_pointer(self, class_type: Type[Z]):
-        return self.__ptr
+        WrapperBase.__init__(self, UtilFFI.LIB.Z_Create, UtilFFI.LIB.Z_Destroy, ptr)
 
     def get_z(self) -> int:
-        return UtilFFI.LIB.Z_GetZ(self.__ptr)
+        return UtilFFI.LIB.Z_GetZ(self.get_c_pointer(Z))
 
     def set_z(self, value: int):
-        return UtilFFI.LIB.Z_SetZ(self.__ptr, value)
+        return UtilFFI.LIB.Z_SetZ(self.get_c_pointer(Z), value)
 
     def print(self):
-        UtilFFI.LIB.Z_Print(self.__ptr)
+        UtilFFI.LIB.Z_Print(self.get_c_pointer(Z))
 
 
 class Vec3(X, Y, Z):
 
     def __init__(self, ptr=None) -> None:
-        UtilFFI.__init__(self)
-        self.__originator, self.__ptr = UtilFFI.init_ptr(UtilFFI.LIB.Vec3_Create, ptr)
-        X.__init__(self, UtilFFI.LIB.Vec3_AsX(self.__ptr))
-        Y.__init__(self, UtilFFI.LIB.Vec3_AsY(self.__ptr))
-        Z.__init__(self, UtilFFI.LIB.Vec3_AsZ(self.__ptr))
-
-    def __del__(self):
-        if self.__originator:
-            UtilFFI.LIB.Vec3_Destroy(self.__ptr)
-        self.__ptr = None
-        self.__originator = False
-
-    def is_originator(self):
-        return self.__originator
-
-    def get_c_pointer(self, class_type: Union[Type[Vec3], Vec3.__bases__]):
-        if not class_type or class_type == self.__class__:
-            return self.__ptr
-        return class_type.get_c_pointer(self, class_type)
+        WrapperBase.__init__(self, UtilFFI.LIB.Vec3_Create, UtilFFI.LIB.Vec3_Destroy, ptr)
+        self.ptr_dict[X] = UtilFFI.LIB.Vec3_AsX(self.get_c_pointer(Vec3))
+        self.ptr_dict[Y] = UtilFFI.LIB.Vec3_AsY(self.get_c_pointer(Vec3))
+        self.ptr_dict[Z] = UtilFFI.LIB.Vec3_AsZ(self.get_c_pointer(Vec3))
 
     def get_vec3(self) -> Tuple[int, int, int]:
         buffer_array = UtilFFI.FFI.new("int[3]")
         buffer_ptr = UtilFFI.FFI.cast("int *", buffer_array)
-        UtilFFI.LIB.Vec3_GetVec3(self.__ptr, buffer_ptr, buffer_ptr + 1, buffer_ptr + 2)
+        UtilFFI.LIB.Vec3_GetVec3(self.get_c_pointer(Vec3), buffer_ptr, buffer_ptr + 1, buffer_ptr + 2)
         vec_tuple = buffer_array[0], buffer_array[1], buffer_array[2]
         return vec_tuple
 
     def set_vec3(self, x: int, y: int, z: int) -> None:
-        UtilFFI.LIB.Vec3_SetVec3(self.__ptr, x, y, z)
+        UtilFFI.LIB.Vec3_SetVec3(self.get_c_pointer(Vec3), x, y, z)
 
     def print(self):
-        UtilFFI.LIB.Vec3_Print(self.__ptr)
+        UtilFFI.LIB.Vec3_Print(self.get_c_pointer(Vec3))
 
 
 class GlobalMethods:
@@ -216,6 +168,7 @@ def test_vec3():
 
 
 if __name__ == '__main__':
+    UtilFFI()
     temp: Vec3 = Vec3()
     temp.set_vec3(10, 20, 30)
     GlobalMethods.zero_y(temp)
@@ -224,7 +177,6 @@ if __name__ == '__main__':
     print(temp.get_c_pointer(class_type=X))
     print(temp.get_c_pointer(class_type=Y))
     print(temp.get_c_pointer(class_type=Z))
-    print(X().get_c_pointer(Vec3))
     test_x()
     test_y()
     test_z()
