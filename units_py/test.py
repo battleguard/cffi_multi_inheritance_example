@@ -35,6 +35,21 @@ class WrapperBase:
             self.__delete_func: Callable = delete_func
         else:
             self.ptr_dict[self.__class__] = ptr
+        # create ptrs to base classes to handle multi inheritance
+        self.__add_base_class_ptrs(self.__class__)
+
+    def __add_base_class_ptrs(self, cur_class: type):
+        base_types = cur_class.__bases__
+        if base_types == (WrapperBase,):
+            if cur_class is self.__class__:
+                return
+            # example Vec3_AsX(Vec3* self)
+            cast_method_name = f"{self.__class__.__name__}_As{cur_class.__name__}"
+            cast_method = UtilFFI.LIB.__getattr__(cast_method_name)
+            self.ptr_dict[cur_class] = cast_method(self.get_c_pointer(self.__class__))
+        else:
+            for base_type in base_types:
+                self.__add_base_class_ptrs(base_type)
 
     def __del__(self):
         # only delete pointer if we created the pointer ourselves in the __init__ call
@@ -93,9 +108,6 @@ class Vec3(X, Y, Z):
 
     def __init__(self, ptr=None) -> None:
         WrapperBase.__init__(self, UtilFFI.LIB.Vec3_Create, UtilFFI.LIB.Vec3_Destroy, ptr)
-        self.ptr_dict[X] = UtilFFI.LIB.Vec3_AsX(self.get_c_pointer(Vec3))
-        self.ptr_dict[Y] = UtilFFI.LIB.Vec3_AsY(self.get_c_pointer(Vec3))
-        self.ptr_dict[Z] = UtilFFI.LIB.Vec3_AsZ(self.get_c_pointer(Vec3))
 
     def get_vec3(self) -> Tuple[int, int, int]:
         buffer_array = UtilFFI.FFI.new("int[3]")
@@ -109,6 +121,11 @@ class Vec3(X, Y, Z):
 
     def print(self):
         UtilFFI.LIB.Vec3_Print(self.get_c_pointer(Vec3))
+
+
+class Vec4(Vec3):
+    def __init__(self, ptr=None) -> None:
+        WrapperBase.__init__(self, UtilFFI.LIB.Vec3_Create, UtilFFI.LIB.Vec3_Destroy, ptr)
 
 
 class GlobalMethods:
@@ -170,6 +187,7 @@ def test_vec3():
 if __name__ == '__main__':
     UtilFFI()
     temp: Vec3 = Vec3()
+    print(temp.ptr_dict)
     temp.set_vec3(10, 20, 30)
     GlobalMethods.zero_y(temp)
     print(temp.get_vec3())
