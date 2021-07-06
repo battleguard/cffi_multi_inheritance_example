@@ -65,7 +65,7 @@ class WrapperBase:
 
 class X(WrapperBase):
     def __init__(self, ptr=None, x: Optional[int] = None) -> None:
-        if x:
+        if x is not None:
             WrapperBase.__init__(self, x, c_create=UnitsFFI.LIB.X_X_1, ptr=ptr)
         else:
             WrapperBase.__init__(self, c_create=UnitsFFI.LIB.X_X, ptr=ptr)
@@ -83,8 +83,11 @@ class X(WrapperBase):
 
 
 class Y(WrapperBase):
-    def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, c_create=UnitsFFI.LIB.Y_Y, ptr=ptr)
+    def __init__(self, ptr=None, y: Optional[int] = None) -> None:
+        if y is not None:
+            WrapperBase.__init__(self, y, c_create=UnitsFFI.LIB.Y_Y_1, ptr=ptr)
+        else:
+            WrapperBase.__init__(self, c_create=UnitsFFI.LIB.Y_Y, ptr=ptr)
 
     @property
     def y(self) -> int:
@@ -99,8 +102,11 @@ class Y(WrapperBase):
 
 
 class Z(WrapperBase):
-    def __init__(self, ptr=None) -> None:
-        WrapperBase.__init__(self, c_create=UnitsFFI.LIB.Z_Z, ptr=ptr)
+    def __init__(self, ptr=None, z: Optional[int] = None) -> None:
+        if z is not None:
+            WrapperBase.__init__(self, z, c_create=UnitsFFI.LIB.Z_Z_1, ptr=ptr)
+        else:
+            WrapperBase.__init__(self, c_create=UnitsFFI.LIB.Z_Z, ptr=ptr)
 
     @property
     def z(self) -> int:
@@ -117,7 +123,7 @@ class Z(WrapperBase):
 class Vec3(X, Y, Z):
 
     def __init__(self, ptr=None, x: Optional[int] = None, y: Optional[int] = None, z: Optional[int] = None) -> None:
-        if x and y and z:
+        if x is not None and y is not None and z is not None:
             WrapperBase.__init__(self, x, y, z, c_create=UnitsFFI.LIB.Vec3_Vec3_1, ptr=ptr)
         else:
             WrapperBase.__init__(self, c_create=UnitsFFI.LIB.Vec3_Vec3, ptr=ptr)

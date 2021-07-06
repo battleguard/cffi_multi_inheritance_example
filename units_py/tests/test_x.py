@@ -34,6 +34,10 @@ def test_owning_ptr_ctor():
     assert original.x == -10
 
 
+def test_x_print():
+    X(x=10).print()
+
+
 def test_reflection_on_ffi_methods():
     UnitsFFI()
     import ctypes

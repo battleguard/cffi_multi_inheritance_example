@@ -19,6 +19,15 @@ def test_vec3_default_ctor2():
     assert ctor_1.vec3 == (10, 20, 30)
 
 
+def test_vec3_default_ctor2_test2():
+    ctor_1: Vec3 = Vec3(x=0, y=10, z=0)
+    assert ctor_1.x == 0
+    assert ctor_1.y == 10
+    assert ctor_1.z == 0
+    assert ctor_1.vec3 == (0, 10, 0)
+
+
+
 def test_vec3_setter():
     vec3: Vec3 = Vec3()
     vec3.set_vec3(10, 20, 30)
