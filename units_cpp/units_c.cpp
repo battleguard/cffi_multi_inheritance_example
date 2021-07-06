@@ -26,8 +26,14 @@ void Z_SetZ(Z* self, int aZ) { self->mZ = aZ; }
 void Z_Print(Z* self) { self->Print(); }
 
 
-Vec3* Vec3_Vec3() { return new Vec3(); }
-Vec3* Vec3_Vec3_1(int aX, int aY, int aZ) { return new Vec3(aX, aY, aZ); }
+Vec3* Vec3_Vec3()
+{
+   return new Vec3();
+}
+Vec3* Vec3_Vec3_1(int aX, int aY, int aZ)
+{
+   return new Vec3(aX, aY, aZ);
+}
 void Vec3_Delete(Vec3* self) { delete self; }
 void Vec3_Print(Vec3* self) { self->Print(); }
 X* Vec3_AsX(Vec3* self) { return static_cast<X*>(self); }
