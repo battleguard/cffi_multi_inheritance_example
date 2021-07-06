@@ -27,7 +27,6 @@ def test_vec3_default_ctor2_test2():
     assert ctor_1.vec3 == (0, 10, 0)
 
 
-
 def test_vec3_setter():
     vec3: Vec3 = Vec3()
     vec3.set_vec3(10, 20, 30)
@@ -50,4 +49,3 @@ def test_casting_down():
     assert z_shallow.z == 30
     vec3.z = 10
     assert z_shallow.z == 10
-

@@ -13,7 +13,7 @@ class UnitsFFI:
         if UnitsFFI.LIB:
             return
         cur_file_path = pathlib.Path(__file__).parent.resolve()
-        install_path = cur_file_path.joinpath("../build/wsf_install")
+        install_path = cur_file_path.joinpath("../units_install")
         units_include_path = install_path.joinpath("include/units/units.h").absolute()
         lib_path = install_path.joinpath("bin/units.dll").absolute()
         UnitsFFI.FFI = cffi.FFI()

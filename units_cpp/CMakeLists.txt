@@ -6,7 +6,7 @@ add_library(units SHARED units.hpp units_c.cpp units.h)
 set_target_properties(units PROPERTIES PUBLIC_HEADER units.h)
 
 
-set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/wsf_install" CACHE PATH "Installation path" FORCE)
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/../units_install" CACHE PATH "Installation path" FORCE)
 install(TARGETS units
    RUNTIME DESTINATION  bin
    PUBLIC_HEADER DESTINATION  include/units
