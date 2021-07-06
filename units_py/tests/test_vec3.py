@@ -1,7 +1,5 @@
 from units import UnitsFFI, Vec3, Z
 
-UnitsFFI()
-
 
 def test_vec3_default_ctor():
     default_ctor: Vec3 = Vec3()

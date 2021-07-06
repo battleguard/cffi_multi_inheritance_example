@@ -2,8 +2,6 @@ from _cffi_backend import CType, _CDataBase
 
 from units import UnitsFFI, X
 
-UnitsFFI()
-
 
 def test_x_ctor_default():
     ctor1: X = X()

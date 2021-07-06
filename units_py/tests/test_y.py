@@ -2,9 +2,6 @@ from _cffi_backend import CType
 
 from units import UnitsFFI, Y
 
-UnitsFFI()
-
-
 def test_y_ctor_default():
     ctor1: Y = Y()
     assert ctor1.y == 0

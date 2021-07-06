@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import Optional, Type, Any, Dict, Tuple, Union, List, Callable
 import pathlib
 import cffi
+from _cffi_backend import CLibrary
 from cffi import FFI
 
 
 class UnitsFFI:
-    FFI: Optional[FFI] = None
-    LIB: Optional = None
+    FFI: FFI = None
+    LIB: CLibrary = None
 
     def __init__(self) -> None:
         if UnitsFFI.LIB:
@@ -24,6 +25,10 @@ class UnitsFFI:
                     header_str += line
         UnitsFFI.FFI.cdef(header_str)
         UnitsFFI.LIB = UnitsFFI.FFI.dlopen(str(lib_path))
+
+
+# todo find better way of creating
+UnitsFFI()
 
 
 class WrapperBase:

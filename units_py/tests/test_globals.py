@@ -1,8 +1,5 @@
 from units import GlobalMethods, X, Y, Z, UnitsFFI, Vec3
 
-UnitsFFI()
-
-
 def test_zero_y():
     y: Y = Y(y=10)
     assert y.y == 10
