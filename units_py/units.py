@@ -4,6 +4,7 @@ import pathlib
 import cffi
 from _cffi_backend import CLibrary
 from cffi import FFI
+from sys import platform
 
 
 class UnitsFFI:
@@ -16,7 +17,11 @@ class UnitsFFI:
         cur_file_path = pathlib.Path(__file__).parent.resolve()
         install_path = cur_file_path.joinpath("../units_install")
         units_include_path = install_path.joinpath("include/units/units.h").absolute()
-        lib_path = install_path.joinpath("bin/units.dll").absolute()
+        if platform == 'win32':
+            lib_path = install_path.joinpath("bin/units.dll").absolute()
+        else:
+            lib_path = install_path.joinpath("lib/libunits.so").absolute()
+
         UnitsFFI.FFI = cffi.FFI()
         header_str = ""
         with open(units_include_path, 'r') as file:

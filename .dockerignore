@@ -1,0 +1,12 @@
+*.ide_conf
+**/.git
+build/
+
+# python items
+__pychache__
+.idea/
+.venv/
+
+Dockerfile
+docker-compose.yml
+README.MD

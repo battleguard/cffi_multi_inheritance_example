@@ -8,6 +8,7 @@ void X_Delete(X* self) { delete self; }
 int X_GetX(X* self) { return self->mX; }
 void X_SetX(X* self, int aX) { self->mX = aX; }
 void X_Print(X* self) { self->Print(); }
+bool X_IsZero(X* self) { return self->mX == 0; }
 
 
 Y* Y_Y() { return new Y(); }

@@ -15,6 +15,7 @@ extern "C"
    int X_GetX(X* self);
    void X_SetX(X* self, int aX);
    void X_Print(X* self);
+   bool X_IsZero(X* self);
 
    Y* Y_Y();
    Y* Y_Y_1(int aY);

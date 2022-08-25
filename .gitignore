@@ -2,3 +2,4 @@
 build/
 **/.idea/
 units_install/
+**/__pycache__/

@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  build:
+    build:
+      context: .
+    image: prism
+    command: python -m pytest .
